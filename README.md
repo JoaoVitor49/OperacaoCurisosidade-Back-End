@@ -149,4 +149,4 @@ A documentação da API (Swagger/OpenAPI) estará disponível em `https://localh
 
 O cliente web que consome esta API pode ser encontrado no repositório do Frontend:
 
-> [https://github.com/JoaoVitor49/OperacaoCurisosidade-Front-End]
+> [https://github.com/JoaoVitor49/OperacaoCurisosidade-Back-End]
