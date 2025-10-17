@@ -48,14 +48,14 @@ Esta **View Virtual** é utilizada pelo Entity Framework para mapear o DTO `Dash
 ```sql
 CREATE VIEW DashboardList AS
 SELECT 
-    C.Id,
-    C.Name,
-    C.Email,
-    C.RegisterDate,
-    C.IsActive,
-    C.UserId 
+    c.Id,
+    c.Name,
+    c.Email,
+    c.RegisterDate,
+    c.IsActive,
+    c.UserId
 FROM 
-    Clients C; -- SUBSTITUA 'Clients' pelo nome REAL da sua tabela de clientes
+    Clients c;
 GO
 ```
 
@@ -64,7 +64,7 @@ GO
 Responsável pela paginação, pesquisa e aplicação da regra de permissão (Admin/User) na listagem de logs.
 
 ```sql
-ALTER PROCEDURE LogList
+CREATE PROCEDURE LogList
     @Search NVARCHAR(255) = NULL,
     @Page INT,
     @Limit INT,
@@ -72,8 +72,11 @@ ALTER PROCEDURE LogList
     @TotalRecords INT OUTPUT
 AS
 BEGIN
+    -- 1. Definição do Offset
     DECLARE @Offset INT = (@Page - 1) * @Limit;
-    
+
+    -- Lógica de Pesquisa Centralizada:
+    -- Esta variável @SearchFilter simplifica as cláusulas WHERE
     DECLARE @SearchFilter NVARCHAR(MAX) = 
         CASE 
             WHEN @Search IS NOT NULL AND @Search <> '' 
@@ -85,11 +88,11 @@ BEGIN
     SELECT @TotalRecords = COUNT(L.Id)
     FROM Logs L
     WHERE 
-        -- Lógica de Permissão (NULL para Admin, Email para User):
+        -- Lógica de Permissão (Admin/User):
         (@EmailLogado IS NULL OR L.UserEmail = @EmailLogado)
         -- Filtro de Pesquisa (Action OU UserEmail):
         AND (
-            @SearchFilter IS NULL
+            @SearchFilter IS NULL -- Se não há termo de busca, a condição é TRUE
             OR L.Action LIKE @SearchFilter
             OR L.UserEmail LIKE @SearchFilter
         );
@@ -102,6 +105,7 @@ BEGIN
         L.Action 
     FROM Logs L
     WHERE 
+        -- Aplica as mesmas condições de filtro e permissão
         (@EmailLogado IS NULL OR L.UserEmail = @EmailLogado)
         AND (
             @SearchFilter IS NULL
